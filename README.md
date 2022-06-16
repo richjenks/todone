@@ -2,6 +2,24 @@
 
 Hacky script to generate a list of completed tasks from MS Todo using Microsoft's Graph API.
 
+## Sample Output
+
+```
+🚀 Launch (3)
+Write launch checklist
+Refuel the rocket
+Feed the pilot
+
+🥪 Lunch (5)
+Buy bread
+Buy sliced ham
+Buy mustard
+sudo make sandwich
+Have lunch
+
+8 tasks completed between 1970-01-01 & 2038-01-19
+```
+
 ## Usage
 
 1. Run `npm i`
