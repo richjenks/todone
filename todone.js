@@ -13,7 +13,7 @@ const client = Client.init({
 	},
 })
 
-// Gets task lists, filtering those in `.config.js`
+// Gets task lists, filtering those with given names
 const getLists = function(filter = []) {
 	return new Promise(function(resolve, reject) {
 		client
@@ -28,7 +28,7 @@ const getLists = function(filter = []) {
 }
 
 // Gets tasks completed between dates in `.config.js`
-const getTasks = function(id, name) {
+const getTasks = function(id, name, after, before) {
 	return new Promise(function(resolve, reject) {
 		client
 			.api("/me/todo/lists/" + id + "/tasks")
@@ -39,15 +39,15 @@ const getTasks = function(id, name) {
 				// Filter incomplete first bc missing `completedDateTime` causes error
 				res = res.filter(task => task.status === "completed")
 
-				// Only tasks completed within dates in `.config.js`
+				// Only tasks completed within dates provided
 				res = res.filter(task => {
 					let completed = new Date(task.completedDateTime.dateTime),
-						start     = new Date(config.start),
-						end       = new Date(config.end)
-					return (completed > start && completed < end)
+						start     = new Date(after),
+						end       = new Date(before)
+					return (start < completed && completed < end)
 				})
 
-				// Sort by most recently completed and prepend list name
+				// Sort by most recently completed and prepend list details
 				res.sort((a, b) => new Date(b.date) - new Date(a.date))
 				res.unshift({
 					title: name,
@@ -65,7 +65,7 @@ getLists(config.ignoreLists).then(lists => {
 	// Promise Pokédex
 	let promises = []
 	lists.forEach(list => {
-		promises.push(getTasks(list.id, list.displayName))
+		promises.push(getTasks(list.id, list.displayName, config.start, config.end))
 	})
 
 	// Gotta catch 'em all!
@@ -79,16 +79,11 @@ getLists(config.ignoreLists).then(lists => {
 
 		// Output each list's tasks
 		lists.forEach(list => {
-
-			// List name + number of completed tasks
-			let header = list.shift().title + " (" + list.length + ")"
-
-			// Task list
 			if (list.length > 0) {
-				tasks += list.length
-				console.log(header)
+				console.log(list.shift().title + " (" + list.length + ")")
 				list.forEach(task => console.log(task.title))
 				console.log()
+				tasks += list.length
 			}
 
 		})
